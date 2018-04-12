@@ -1,0 +1,107 @@
+---
+title: "PROJECT"
+author: "JANANI"
+date: "March 14, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+pima<-read.csv("c:/users/HP/Downloads/diabetes.csv",header = TRUE)
+str(pima)
+head(pima)
+summary(pima)
+```
+```{r}
+# list types for each attribute
+sapply(pima, class)
+```
+
+```{r}
+pima$Outcome <- factor(pima$Outcome)
+for (i in 2:6) {
+      pima <- pima[-which(pima[, i] == 0), ]}
+```
+
+
+
+```{r}
+model<-glm(Outcome~Pregnancies+Glucose+BloodPressure+SkinThickness+Insulin+
+             BMI+
+             DiabetesPedigreeFunction+Age,data = pima,
+           family = "binomial")
+summary(model)
+```
+
+
+```{r}
+# boxplot for each attribute on one image
+par(mfrow=c(1,7))
+  for(i in 1:7) {
+  boxplot(x[,i], main=names(pima)[i])
+}
+```
+
+
+
+
+
+```{r}
+x <- pima[,1:7]
+y <- pima[,8:9]
+plot(y)
+```
+
+
+
+```{r}
+library(corrplot)
+correl <- cor(pima[,1:8])
+corrplot(correl, method = "circle")
+```
+
+
+```{r}
+wss = c()
+for(k in 1:8){
+diabetes_Clust <- kmeans(pima[, 2:8], k,nstart = 10)
+wss = c(wss,diabetes_Clust$tot.withinss)
+}
+plot(1:8,wss,'b')
+diabetes_Clust <- kmeans(pima[, 2:8], 8,nstart = 10)
+```
+
+
+```{r}
+table(diabetes_Clust$cluster, pima$Outcome)
+```
+
+
+```{r}
+library(ggplot2)
+pima$cluster <- as.factor(diabetes_Clust$cluster)
+ggplot(pima, aes(Pregnancies,Age,color = pima$Outcome)) + 
+  geom_point(alpha = 0.4, size = 3.5) + geom_point(col = pima$cluster) + 
+  scale_color_manual(values = c('black', 'red', 'green'))
+```
+
+```{r}
+dist(pima)
+hc = hclust(dist(pima),method = 'complete')
+plot(hc)
+```
+##Check what is the impact of age over the Outcome
+
+```{r}
+ggplot(pima,aes(x=Age,fill=factor(Outcome)))+geom_density(alpha=0.4)+scale_fill_manual(values=c("red", "blue"))+labs(title="Distribution of Age")
+```
+#At young age Diabetes pedigree function was high, as age goes on its get reduced
+```{r}
+library(ggplot2)
+ggplot(pima,aes(x=cut(Age,breaks=5),y=DiabetesPedigreeFunction,fill=cut(Age,breaks=5)))+geom_boxplot()
+```
+                 
+
